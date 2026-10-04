@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="utf-8">
+<title>Macro Automation Control Center</title>
+
+<HTA:APPLICATION
+    ID="MacroAutomation"
+    APPLICATIONNAME="Macro Automation Control Center"
+    BORDER="thin"
+    BORDERSTYLE="normal"
+    CAPTION="yes"
+    MAXIMIZEBUTTON="yes"
+    MINIMIZEBUTTON="yes"
+    SHOWINTASKBAR="yes"
+    SINGLEINSTANCE="yes"
+    SYSMENU="yes"
+    WINDOWSTATE="maximized"
+    SCROLL="yes"
+>
+
+
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; font-family: "Segoe UI", Arial, sans-serif; background: #eef2f9; color: #0f172a; }
+body { overflow: hidden; }
+.app { display: flex; width: 100%; height: 100vh; }
+
+/* SIDEBAR */
+.sidebar { position: relative; width: 250px; flex-shrink: 0; padding: 24px 16px; color: #fff; background: #0b1220; background-image: linear-gradient(180deg, #111c3a 0%, #0b1220 60%, #070b14 100%); box-shadow: 4px 0 24px rgba(2,6,23,0.25); }
+.brand { display: flex; align-items: center; padding: 4px 8px 30px 8px; }
+.brand-icon { width: 46px; height: 46px; margin-right: 12px; border-radius: 13px; font-size: 22px; display: flex; align-items: center; justify-content: center; background: #2563eb; background-image: linear-gradient(135deg, #38bdf8, #2563eb 55%, #7c3aed); box-shadow: 0 6px 18px rgba(37,99,235,0.55); }
+.brand-title { font-weight: 700; font-size: 16px; letter-spacing: 0.2px; }
+.brand-subtitle { color: #8da2c0; font-size: 10px; margin-top: 3px; letter-spacing: 1px; text-transform: uppercase; }
+.nav-title { color: #5b6f91; font-size: 10px; font-weight: 700; padding: 8px 12px; text-transform: uppercase; letter-spacing: 1.6px; }
+.nav-item { padding: 12px 14px; border-radius: 10px; color: #b6c4dc; cursor: pointer; margin-bottom: 6px; font-size: 13px; font-weight: 600; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(148,163,184,0.12); color: #fff; }
+.nav-item.active { color: #fff; border-left: 3px solid #7dd3fc; background: #2563eb; background-image: linear-gradient(90deg, #2563eb, #4f46e5); box-shadow: 0 6px 16px rgba(37,99,235,0.35); }
+.nav-icon { width: 26px; display: inline-block; opacity: 0.9; }
+.sidebar-footer { position: absolute; bottom: 20px; left: 22px; color: #5b6f91; font-size: 10px; line-height: 1.6; }
+
+/* MAIN */
+.main { flex: 1 1 0%; min-width: 0; height: 100vh; overflow-y: auto; padding: 0 32px 44px 32px; }
+
+/* HEADER */
+.header { display: flex; justify-content: space-between; align-items: center; margin: 0 -32px 26px -32px; padding: 24px 32px; color: #fff; background: #1e3a8a; background-image: linear-gradient(120deg, #0f172a 0%, #1e3a8a 55%, #4338ca 100%); box-shadow: 0 8px 28px rgba(30,58,138,0.28); }
+.header-title { font-size: 26px; font-weight: 700; letter-spacing: 0.2px; }
+.header-subtitle { color: #bfd0f5; font-size: 13px; margin-top: 5px; }
+.header-right { display: flex; }
+.status-pill + .status-pill { margin-left: 10px; }
+.status-pill { padding: 8px 15px; border-radius: 22px; background: rgba(255,255,255,0.14); color: #dbe7ff; border: 1px solid rgba(255,255,255,0.22); font-size: 11px; font-weight: 700; }
+.status-pill:before { content: "\25CF  "; color: #94a3b8; }
+.status-pill.green { background: rgba(34,197,94,0.20); color: #bbf7d0; border-color: rgba(74,222,128,0.5); }
+.status-pill.green:before { color: #4ade80; }
+.status-pill.red { background: rgba(239,68,68,0.22); color: #fecaca; border-color: rgba(248,113,113,0.5); }
+.status-pill.red:before { color: #f87171; }
+.status-pill.blue { background: rgba(56,189,248,0.2); color: #bae6fd; border-color: rgba(125,211,252,0.5); }
+.status-pill.blue:before { color: #38bdf8; }
+
+/* CARDS */
+.card { background: #fff; border: 1px solid #e2e8f4; border-radius: 16px; padding: 22px; margin-bottom: 20px; box-shadow: 0 4px 18px rgba(15,23,42,0.06); }
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+.card-header .btn + .btn { margin-left: 8px; }
+.card-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+.card-description { color: #64748b; font-size: 12px; margin-top: 5px; line-height: 1.5; }
+
+/* FILE */
+.file-area { margin-top: 18px; display: flex; align-items: center; }
+.file-input { display: none; }
+.file-button { background: #2563eb; background-image: linear-gradient(135deg, #3b82f6, #4f46e5); color: #fff; padding: 13px 20px; border-radius: 11px; cursor: pointer; font-size: 12px; font-weight: 700; box-shadow: 0 6px 16px rgba(59,130,246,0.38); margin-right: 14px; }
+.file-button:hover { background-image: linear-gradient(135deg, #2563eb, #4338ca); }
+.file-information { flex: 1 1 0%; background: #f6f8fd; border: 2px dashed #c7d3ea; padding: 12px 16px; border-radius: 11px; }
+.file-name { font-weight: 700; font-size: 13px; }
+.file-details { color: #64748b; font-size: 11px; margin-top: 3px; }
+
+/* KPI */
+.kpi-grid { display: flex; margin-bottom: 20px; }
+.kpi + .kpi { margin-left: 14px; }
+.kpi { flex: 1 1 0%; background: #fff; border: 1px solid #e2e8f4; border-top: 4px solid #3b82f6; border-radius: 14px; padding: 18px; box-shadow: 0 4px 16px rgba(15,23,42,0.06); }
+.kpi:nth-child(2) { border-top-color: #22c55e; }
+.kpi:nth-child(3) { border-top-color: #f59e0b; }
+.kpi:nth-child(4) { border-top-color: #ef4444; }
+.kpi:nth-child(5) { border-top-color: #8b5cf6; }
+.kpi-label { color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.kpi-value { font-size: 32px; font-weight: 700; margin-top: 8px; color: #0f172a; }
+.kpi-description { color: #94a3b8; font-size: 10px; margin-top: 4px; }
+
+/* INFO */
+.info-grid { display: flex; margin-bottom: 20px; }
+.info-card + .info-card { margin-left: 14px; }
+.info-card { flex: 1 1 0%; background: #fff; border: 1px solid #e2e8f4; border-left: 4px solid #6366f1; border-radius: 14px; padding: 16px 18px; box-shadow: 0 4px 16px rgba(15,23,42,0.05); }
+.info-label { color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.info-value { margin-top: 7px; font-size: 15px; font-weight: 700; color: #1e293b; }
+
+/* BUTTONS */
+.btn { border: 0; border-radius: 10px; padding: 11px 17px; cursor: pointer; font-family: "Segoe UI", Arial, sans-serif; font-size: 12px; font-weight: 700; }
+.btn-primary { background: #2563eb; background-image: linear-gradient(135deg, #3b82f6, #4f46e5); color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
+.btn-success { background: #16a34a; background-image: linear-gradient(135deg, #22c55e, #15803d); color: #fff; box-shadow: 0 4px 12px rgba(34,197,94,0.35); }
+.btn-danger { background: #dc2626; color: #fff; }
+.btn-secondary { background: #eef2fb; color: #334155; border: 1px solid #d5dded; }
+.btn-primary:hover, .btn-success:hover { opacity: 0.9; }
+.btn-secondary:hover { background: #e0e8f7; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+/* PROGRESS */
+.progress-area { margin-top: 20px; }
+.progress-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #334155; }
+.progress-track { height: 12px; background: #e6ecf7; border-radius: 12px; overflow: hidden; margin-top: 10px; }
+.progress-bar { height: 100%; width: 0%; background: #2563eb; background-image: linear-gradient(90deg, #38bdf8, #4f46e5, #8b5cf6); border-radius: 12px; transition: width 0.4s ease; }
+
+/* TABLE */
+.table-container { overflow: auto; max-height: 400px; margin-top: 14px; border: 1px solid #e8edf7; border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; }
+thead th { background: #f3f6fc; color: #64748b; font-size: 10px; font-weight: 700; padding: 12px 12px; text-align: left; letter-spacing: 1px; text-transform: uppercase; position: sticky; top: 0; }
+tbody td { border-top: 1px solid #eef2f9; padding: 11px 12px; font-size: 12px; color: #1e293b; }
+tbody tr:nth-child(even) { background: #fafbfe; }
+tbody tr:hover { background: #eef4ff; }
+
+/* BADGES */
+.badge { display: inline-block; border-radius: 15px; padding: 5px 11px; font-size: 10px; font-weight: 700; }
+.badge-ready { background: #e2e8f0; color: #475569; }
+.badge-pending { background: #fef3c7; color: #92400e; }
+.badge-running { background: #dbeafe; color: #1d4ed8; }
+.badge-completed { background: #dcfce7; color: #166534; }
+.badge-failed { background: #fee2e2; color: #991b1b; }
+.badge-skipped { background: #f1f5f9; color: #64748b; }
+
+/* TWO COLUMNS */
+.two-columns { display: flex; align-items: stretch; }
+.two-columns > .card:first-child { flex: 1.3 1 0%; margin-right: 20px; min-width: 0; }
+.two-columns > .card:last-child { flex: 1 1 0%; min-width: 0; }
+
+/* LOG */
+.log-window { margin-top: 14px; background: #0b1220; color: #cbd5e1; border-radius: 12px; padding: 15px; height: 290px; overflow-y: auto; font-family: Consolas, monospace; font-size: 11px; border: 1px solid #1e293b; box-shadow: inset 0 2px 12px rgba(0,0,0,0.5); }
+.log-line { margin-bottom: 8px; line-height: 1.5; }
+.log-success { color: #86efac; }
+.log-error { color: #fca5a5; }
+.log-info { color: #93c5fd; }
+.log-time { color: #64748b; }
+
+/* TIMELINE */
+.timeline { height: 290px; overflow-y: auto; margin-top: 14px; padding-left: 4px; }
+.timeline-item { display: flex; margin-bottom: 15px; padding-left: 12px; border-left: 2px solid #dbe4f5; }
+.timeline-dot { width: 11px; height: 11px; background: #2563eb; border: 2px solid #fff; box-shadow: 0 0 0 2px #93c5fd; border-radius: 50%; margin-top: 3px; margin-right: 11px; margin-left: -19px; flex-shrink: 0; }
+.timeline-time { color: #64748b; font-size: 10px; font-weight: 600; }
+.timeline-event { font-size: 12px; margin-top: 2px; color: #1e293b; }
+
+/* ALERT */
+.alert { display: none; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; font-size: 12px; font-weight: 600; box-shadow: 0 4px 14px rgba(15,23,42,0.08); }
+.alert-error { background: #fee2e2; color: #991b1b; border-left: 5px solid #ef4444; }
+.alert-success { background: #dcfce7; color: #166534; border-left: 5px solid #22c55e; }
+.alert-warning { background: #fef3c7; color: #92400e; border-left: 5px solid #f59e0b; }
+
+/* MODAL */
+.modal-background { position: fixed; display: none; align-items: center; justify-content: center; left: 0; right: 0; top: 0; bottom: 0; background: rgba(8,13,28,0.68); z-index: 1000; }
+.modal { background: #fff; width: 490px; border-radius: 18px; padding: 28px; border-top: 5px solid #22c55e; box-shadow: 0 30px 80px rgba(0,0,0,0.4); }
+.modal-title { font-size: 20px; font-weight: 700; }
+.modal-body { color: #64748b; font-size: 13px; line-height: 1.7; margin-top: 12px; }
+.modal-actions { display: flex; justify-content: flex-end; margin-top: 22px; }
+.modal-actions .btn + .btn { margin-left: 10px; }
+
+.empty { text-align: center; padding: 40px; color: #94a3b8; font-size: 12px; }
+.section { display: block; }
+
+/* SUBWAY MAP */
+.subway-wrap { overflow: auto; max-height: 580px; margin-top: 16px; border: 1px solid #dbe4f5; border-radius: 14px; background-color: #f8faff; background-image: linear-gradient(rgba(148,163,184,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.16) 1px, transparent 1px); background-size: 26px 26px; box-shadow: inset 0 2px 10px rgba(15,23,42,0.05); }
+.sw-legend { margin-top: 14px; padding: 11px 14px; background: #f6f8fd; border-radius: 10px; font-size: 11px; color: #475569; }
+.sw-legend span { display: inline-block; margin-right: 18px; }
+.sw-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #475569; vertical-align: middle; margin-right: 6px; background: #fff; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #c3cee3; border-radius: 10px; }
+.master-select { margin-top: 9px; width: 100%; padding: 7px 9px; border: 1px solid #d5dded; border-radius: 8px; font-size: 12px; font-family: "Segoe UI", Arial, sans-serif; background: #f8faff; color: #1e293b; }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+    <div class="brand">
+        <div class="brand-icon">⚙</div>
+        <div>
+            <div class="brand-title">Automation Center</div>
+            <div class="brand-subtitle">Excel VBA Control</div>
+        </div>
+    </div>
+
+    <div class="nav-title">Workspace</div>
+
+    <div id="navOverview" class="nav-item active" onclick="navigate('overview')"><span class="nav-icon">▦</span> Overview</div>
+    <div id="navMacros" class="nav-item" onclick="navigate('macros')"><span class="nav-icon">▤</span> Macro Explorer</div>
+    <div id="navRun" class="nav-item" onclick="navigate('run')"><span class="nav-icon">▶</span> Run Automation</div>
+    <div id="navLogs" class="nav-item" onclick="navigate('logs')"><span class="nav-icon">≡</span> Execution Logs</div>
+
+    <div class="sidebar-footer">
+        Macro Automation Control Center<br>
+        Client Edition
+    </div>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <div class="header-title">Macro Automation Control Center</div>
+            <div class="header-subtitle">Monitor, execute and analyze Excel-based automation</div>
+        </div>
+        <div class="header-right">
+            <div id="excelStatus" class="status-pill">Excel Offline</div>
+            <div id="workbookStatusPill" class="status-pill">No Workbook</div>
+        </div>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <!-- FILE SELECTION -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Select Automation Workbook</div>
+                <div class="card-description">Select a macro-enabled Excel workbook (.xlsm)</div>
+            </div>
+            <button class="btn btn-secondary" onclick="closeExcel()">Close Excel</button>
+        </div>
+
+        <div class="file-area">
+            <input type="file" id="xlsmFile" class="file-input" accept=".xlsm" onchange="workbookSelected()">
+            <label for="xlsmFile" class="file-button">📁 Choose XLSM File</label>
+            <div class="file-information">
+                <div id="fileName" class="file-name">No workbook selected</div>
+                <div id="fileDetails" class="file-details">Select an XLSM workbook to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="kpi-label">TOTAL MACROS</div>
+            <div id="totalMacros" class="kpi-value">0</div>
+            <div class="kpi-description">Detected procedures</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">COMPLETED</div>
+            <div id="completedMacros" class="kpi-value">0</div>
+            <div class="kpi-description">Confirmed execution</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">RUNNING</div>
+            <div id="runningMacros" class="kpi-value">0</div>
+            <div class="kpi-description">Currently running</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">FAILED</div>
+            <div id="failedMacros" class="kpi-value">0</div>
+            <div class="kpi-description">Execution failures</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">PROGRESS</div>
+            <div id="progressValue" class="kpi-value">0%</div>
+            <div class="kpi-description">Automation progress</div>
+        </div>
+    </div>
+
+    <!-- WORKBOOK INFORMATION -->
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-label">MASTER MACRO</div>
+            <div id="masterMacro" class="info-value">Not detected</div>
+            <select id="masterSelect" class="master-select" onchange="setMaster(this.value)" style="display:none"></select>
+        </div>
+        <div class="info-card">
+            <div class="info-label">WORKBOOK</div>
+            <div id="workbookName" class="info-value">None</div>
+        </div>
+        <div class="info-card">
+            <div class="info-label">LAST EXECUTION</div>
+            <div id="lastExecution" class="info-value">None</div>
+        </div>
+    </div>
+
+    <!-- EXECUTION -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Automation Execution</div>
+                <div class="card-description">Execute the detected Master Macro</div>
+            </div>
+            <div>
+                <button id="runButton" class="btn btn-success" disabled onclick="showRunConfirmation()">▶ Run Master Macro</button>
+                <button class="btn btn-secondary" onclick="refreshWorkbook()">↻ Refresh</button>
+            </div>
+        </div>
+
+        <div class="progress-area">
+            <div class="progress-top">
+                <span id="progressLabel">Waiting for automation</span>
+                <span id="progressText">0 / 0</span>
+            </div>
+            <div class="progress-track">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBWAY MAP -->
+    <div id="subwaySection" class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Execution Subway Map</div>
+                <div class="card-description">
+                    Master macro = main line. Every macro that calls child macros
+                    becomes an interchange and opens a new line.
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="loadDemo()">Load Demo</button>
+                <button class="btn btn-secondary" onclick="buildSubway()">Rebuild Map</button>
+                <button class="btn btn-primary" onclick="replayExecution(true)">&#9654; Preview Flow</button>
+            </div>
+        </div>
+
+        <div id="subwayWrap" class="subway-wrap">
+            <div class="empty">Open a workbook to generate the map.</div>
+        </div>
+
+        <div class="sw-legend">
+            <span><i class="sw-dot"></i>Ready / Pending</span>
+            <span><i class="sw-dot" style="background:#fde047"></i>Running</span>
+            <span><i class="sw-dot" style="background:#86efac"></i>Completed</span>
+            <span><i class="sw-dot" style="background:#fca5a5"></i>Failed</span>
+            <span><i class="sw-dot" style="border-width:4px"></i>Interchange (has child macros)</span>
+            <span>Numbers = execution order</span>
+        </div>
+    </div>
+
+    <!-- MACRO EXPLORER -->
+    <div id="macroSection" class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Macro Explorer</div>
+                <div class="card-description">Dynamically discovered VBA procedures</div>
+            </div>
+            <button class="btn btn-secondary" onclick="detectMacros()">Detect Again</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Macro Name</th>
+                        <th>Type</th>
+                        <th>Module</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Calls / Dependency</th>
+                    </tr>
+                </thead>
+                <tbody id="macroTable">
+                    <tr>
+                        <td colspan="7"><div class="empty">No macros detected.</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="two-columns">
+
+        <div id="logSection" class="card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Execution Log</div>
+                    <div class="card-description">Real-time application events</div>
+                </div>
+                <button class="btn btn-secondary" onclick="clearLogs()">Clear</button>
+            </div>
+
+            <div id="logWindow" class="log-window">
+                <div class="log-line">
+                    <span class="log-time">[SYSTEM]</span> Dashboard initialized.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Execution Timeline</div>
+            <div class="card-description">Automation events</div>
+            <div id="timeline" class="timeline">
+                <div class="empty">No execution events.</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+<!-- CONFIRMATION MODAL -->
+<div id="confirmBackground" class="modal-background">
+    <div class="modal">
+        <div class="modal-title">Run Master Automation?</div>
+        <div class="modal-body">
+            You are about to execute:
+            <br><br>
+            <strong id="confirmationMacro">Master Macro</strong>
+            <br><br>
+            This will execute the VBA automation contained in the selected workbook.
+            <br><br>
+            Make sure the workbook is ready before continuing.
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="hideRunConfirmation()">Cancel</button>
+            <button class="btn btn-success" onclick="executeMasterMacro()">Run Automation</button>
+        </div>
+    </div>
+</div>
+
+
+<script language="javascript">
+
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
+
+var excel = null;
+var workbook = null;
+var workbookPath = "";
+var macros = [];
+var masterMacro = null;
+var automationRunning = false;
+var executionStart = null;
+var pollingTimer = null;
+var statusFile = "";
+var executionHistory = [];
+
+
+/* =====================================================
+   INITIALIZATION
+===================================================== */
+
+window.onload = function () {
+    addLog("Dashboard initialized.", "info");
+    addTimeline("Dashboard initialized");
+};
+
+
+/* =====================================================
+   FILE SELECTION
+===================================================== */
+
+function workbookSelected() {
+
+    var input = document.getElementById("xlsmFile");
+
+    if (!input.files || input.files.length === 0) { return; }
+
+    var file = input.files[0];
+    var path = file.path || input.value;
+
+    if (!path) {
+        showAlert("Unable to read the selected file path. Run this file as a .hta (double-click the .hta), not in Chrome/Edge.", "error");
+        return;
+    }
+
+    if (path.toLowerCase().substr(path.length - 5) !== ".xlsm") {
+        showAlert("Please select an .xlsm file.", "error");
+        return;
+    }
+
+    workbookPath = path;
+
+    document.getElementById("fileName").innerText = file.name;
+    document.getElementById("fileDetails").innerText = "Selected • " + formatBytes(file.size);
+
+    addLog("Workbook selected: " + file.name, "info");
+
+    openWorkbook();
+}
+
+
+/* =====================================================
+   OPEN WORKBOOK
+===================================================== */
+
+function openWorkbook() {
+
+    try {
+
+        closeExcel();
+
+        addLog("Starting Excel...", "info");
+
+        excel = new ActiveXObject("Excel.Application");
+        excel.Visible = true;
+        excel.DisplayAlerts = false;
+        excel.EnableEvents = true;
+
+        addLog("Opening workbook...", "info");
+
+        workbook = excel.Workbooks.Open(workbookPath, false, false);
+
+        document.getElementById("excelStatus").innerText = "Excel Connected";
+        document.getElementById("excelStatus").className = "status-pill green";
+        document.getElementById("workbookStatusPill").innerText = "Workbook Loaded";
+        document.getElementById("workbookStatusPill").className = "status-pill green";
+        document.getElementById("workbookName").innerText = workbook.Name;
+
+        addLog("Workbook opened successfully.", "success");
+        addTimeline("Workbook loaded");
+
+        detectMacros();
+
+    }
+    catch (error) {
+        showAlert("Unable to open workbook: " + error.message, "error");
+        addLog("Workbook open failed: " + error.message, "error");
+    }
+}
+
+
+/* =====================================================
+   DETECT MACROS
+===================================================== */
+
+function detectMacros() {
+
+    if (!workbook) {
+        showAlert("Please select an XLSM workbook first.", "warning");
+        return;
+    }
+
+    macros = [];
+    masterMacro = null;
+
+    addLog("Scanning VBA project...", "info");
+
+    try {
+
+        var project = workbook.VBProject;
+        var components = project.VBComponents;
+
+        for (var componentEnumerator = new Enumerator(components);
+             !componentEnumerator.atEnd();
+             componentEnumerator.moveNext()) {
+
+            var component = componentEnumerator.item();
+            var moduleName = component.Name;
+            var moduleType = getModuleType(component.Type);
+            var code = component.CodeModule;
+            var lineCount = code.CountOfLines;
+
+            if (lineCount <= 0) { continue; }
+
+            var allLines = [];
+            try {
+                allLines = String(code.Lines(1, lineCount)).split(/\r?\n/);
+            }
+            catch (readError) {
+                addLog("Could not read module " + moduleName + ": " + readError.message, "error");
+                continue;
+            }
+
+            var found = 0;
+            var li = 0;
+
+            while (li < allLines.length) {
+
+                var decl = /^\s*(?:(?:Public|Private|Friend|Static)\s+)*(Sub|Function)\s+([A-Za-z_][A-Za-z0-9_]*)/i.exec(allLines[li]);
+
+                if (!decl) {
+                    li++;
+                    continue;
+                }
+
+                var procedureName = decl[2];
+                var endLine = li;
+
+                while (endLine < allLines.length - 1 &&
+                       !/^\s*End\s+(Sub|Function)\b/i.test(allLines[endLine])) {
+                    endLine++;
+                }
+
+                if (!macroExists(procedureName, moduleName)) {
+
+                    macros.push({
+                        name: procedureName,
+                        module: moduleName,
+                        type: moduleType,
+                        status: "Ready",
+                        duration: "-",
+                        dependency: "-",
+                        startTime: "",
+                        endTime: "",
+                        body: allLines.slice(li, endLine + 1).join("\r\n"),
+                        calls: [],
+                        calledBy: []
+                    });
+
+                    found++;
+                }
+
+                li = endLine + 1;
+            }
+
+            addLog("Module " + moduleName + ": " + found + " procedure(s) found.", "info");
+        }
+
+        if (macros.length === 0) {
+            showAlert("No VBA procedures were detected.", "warning");
+        }
+        else {
+            addLog("Detected " + macros.length + " VBA procedures.", "success");
+        }
+
+        try { analyzeCalls(); }
+        catch (e1) { addLog("Call analysis failed: " + e1.message, "error"); }
+
+        findMasterMacro();
+
+        try { buildSubway(); }
+        catch (e2) { addLog("Subway map failed: " + e2.message, "error"); }
+
+        renderMacros();
+        updateKPIs();
+
+    }
+    catch (error) {
+
+        showAlert(
+            "VBA project access failed. " +
+            "Enable Excel: File → Options → Trust Center → Macro Settings → Trust access to the VBA project object model.",
+            "error"
+        );
+
+        addLog("VBA inspection failed: " + error.message, "error");
+    }
+}
+
+
+/* =====================================================
+   MODULE TYPE
+===================================================== */
+
+function getModuleType(type) {
+    if (type === 1) { return "Standard Module"; }
+    if (type === 2) { return "Class Module"; }
+    if (type === 3) { return "UserForm"; }
+    if (type === 100) { return "Document"; }
+    return "VBA Component";
+}
+
+
+/* =====================================================
+   CHECK DUPLICATE
+===================================================== */
+
+function macroExists(name, moduleName) {
+    for (var i = 0; i < macros.length; i++) {
+        if (macros[i].name.toLowerCase() === name.toLowerCase() &&
+            macros[i].module.toLowerCase() === moduleName.toLowerCase()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+/* =====================================================
+   FIND MASTER MACRO
+===================================================== */
+
+function findMasterMacro() {
+
+    var candidates = [];
+    var i;
+
+    for (i = 0; i < macros.length; i++) {
+
+        var name = macros[i].name.toLowerCase();
+        var score = 0;
+
+        if (name.indexOf("master") >= 0) { score += 100; }
+        if (name.indexOf("automation") >= 0) { score += 80; }
+        if (name === "main") { score += 70; }
+        if (name.indexOf("runall") >= 0) { score += 60; }
+        if (name.indexOf("run_all") >= 0) { score += 60; }
+
+        if (score > 0) {
+            candidates.push({ macro: macros[i], score: score });
+        }
+    }
+
+    candidates.sort(function (a, b) { return b.score - a.score; });
+
+    var how = "";
+    masterMacro = null;
+
+    if (candidates.length > 0) {
+        masterMacro = candidates[0].macro;
+        how = "by name";
+    }
+    else {
+        /* fallback 1: top of the call tree (called by nobody, calls the most) */
+        var best = null;
+        for (i = 0; i < macros.length; i++) {
+            var cb = macros[i].calledBy || [];
+            var cl = macros[i].calls || [];
+            if (cb.length === 0 && cl.length > 0 &&
+                (!best || cl.length > best.calls.length)) {
+                best = macros[i];
+            }
+        }
+        if (best) {
+            masterMacro = best;
+            how = "top of call tree";
+        }
+        else if (macros.length > 0) {
+            /* fallback 2: first macro found */
+            masterMacro = macros[0];
+            how = "first macro";
+        }
+    }
+
+    populateMasterSelector();
+
+    if (masterMacro) {
+
+        masterMacro.status = "Ready";
+
+        document.getElementById("masterMacro").innerText = masterMacro.name;
+        document.getElementById("runButton").disabled = false;
+
+        addLog("Master Macro identified (" + how + "): " + masterMacro.name, "success");
+        addTimeline("Master Macro: " + masterMacro.name);
+    }
+    else {
+
+        document.getElementById("masterMacro").innerText = "Not detected";
+        document.getElementById("runButton").disabled = true;
+
+        addLog("No macros available to use as Master Macro.", "error");
+    }
+}
+
+
+function populateMasterSelector() {
+
+    var select = document.getElementById("masterSelect");
+    if (!select) { return; }
+
+    select.innerHTML = "";
+
+    if (macros.length === 0) {
+        select.style.display = "none";
+        return;
+    }
+
+    for (var i = 0; i < macros.length; i++) {
+        var opt = document.createElement("option");
+        opt.value = i;
+        opt.text = macros[i].module + "." + macros[i].name;
+        select.options.add(opt);
+        if (macros[i] === masterMacro) { select.selectedIndex = i; }
+    }
+
+    select.style.display = "block";
+}
+
+
+function setMaster(index) {
+
+    var i = parseInt(index, 10);
+    if (isNaN(i) || !macros[i]) { return; }
+
+    for (var k = 0; k < macros.length; k++) { macros[k].status = "Ready"; }
+
+    masterMacro = macros[i];
+
+    document.getElementById("masterMacro").innerText = masterMacro.name;
+    document.getElementById("runButton").disabled = !workbook;
+
+    addLog("Master Macro changed to: " + masterMacro.name, "info");
+    addTimeline("Master Macro set: " + masterMacro.name);
+
+    buildSubway();
+    renderMacros();
+    updateKPIs();
+}
+
+
+/* =====================================================
+   RENDER MACRO TABLE
+===================================================== */
+
+function renderMacros() {
+
+    try { renderSubway(); } catch (swError) {}
+
+    var table = document.getElementById("macroTable");
+
+    table.innerHTML = "";
+
+    if (macros.length === 0) {
+        table.innerHTML =
+            "<tr><td colspan='7'><div class='empty'>No macros detected.</div></td></tr>";
+        return;
+    }
+
+    for (var i = 0; i < macros.length; i++) {
+
+        var macro = macros[i];
+        var row = table.insertRow(-1);
+
+        row.insertCell(0).innerText = i + 1;
+        row.insertCell(1).innerText = macro.name;
+        row.insertCell(2).innerText = macro.type;
+        row.insertCell(3).innerText = macro.module;
+        row.insertCell(4).innerHTML = createBadge(macro.status);
+        row.insertCell(5).innerText = macro.duration;
+        row.insertCell(6).innerText = macro.dependency;
+    }
+}
+
+
+/* =====================================================
+   STATUS BADGE
+===================================================== */
+
+function createBadge(status) {
+
+    var css = "badge-ready";
+    var normalized = String(status).toLowerCase();
+
+    if (normalized === "pending") { css = "badge-pending"; }
+    if (normalized === "running") { css = "badge-running"; }
+    if (normalized === "completed") { css = "badge-completed"; }
+    if (normalized === "failed") { css = "badge-failed"; }
+    if (normalized === "skipped") { css = "badge-skipped"; }
+
+    return "<span class='badge " + css + "'>" + escapeHTML(status) + "</span>";
+}
+
+
+/* =====================================================
+   CONFIRMATION
+===================================================== */
+
+function showRunConfirmation() {
+
+    if (!masterMacro) {
+        showAlert("No Master Macro has been detected.", "warning");
+        return;
+    }
+
+    document.getElementById("confirmationMacro").innerText = masterMacro.name;
+    document.getElementById("confirmBackground").style.display = "flex";
+}
+
+function hideRunConfirmation() {
+    document.getElementById("confirmBackground").style.display = "none";
+}
+
+
+/* =====================================================
+   EXECUTE MASTER MACRO
+===================================================== */
+
+function executeMasterMacro() {
+
+    hideRunConfirmation();
+
+    if (!excel || !workbook) {
+        showAlert("Excel workbook is not loaded.", "error");
+        return;
+    }
+
+    if (!masterMacro) {
+        showAlert("Master Macro is not available.", "error");
+        return;
+    }
+
+    if (automationRunning) {
+        showAlert("Automation is already running.", "warning");
+        return;
+    }
+
+    automationRunning = true;
+    executionStart = new Date();
+
+    resetExecution();
+
+    document.getElementById("runButton").disabled = true;
+
+    addLog("Starting Master Macro: " + masterMacro.name, "info");
+    addTimeline("Master Macro started: " + masterMacro.name);
+
+    try {
+
+        var qualifiedName = "'" + workbook.Name + "'!" + masterMacro.module + "." + masterMacro.name;
+
+        addLog("Executing: " + qualifiedName, "info");
+
+        /* Excel COM execution. */
+        excel.Run(qualifiedName);
+
+        stopStatusPolling();
+
+        completeAutomation();
+
+        /* animate the execution path on the subway map */
+        replayExecution(false);
+
+    }
+    catch (error) {
+
+        stopStatusPolling();
+
+        failAutomation(error.message);
+    }
+}
+
+
+/* =====================================================
+   RESET EXECUTION
+===================================================== */
+
+function resetExecution() {
+
+    if (subwayTimer) {
+        window.clearTimeout(subwayTimer);
+        subwayTimer = null;
+    }
+
+    for (var i = 0; i < macros.length; i++) {
+        macros[i].status = "Pending";
+        macros[i].duration = "-";
+        macros[i].startTime = "";
+        macros[i].endTime = "";
+    }
+
+    if (masterMacro) { masterMacro.status = "Running"; }
+
+    document.getElementById("completedMacros").innerText = "0";
+    document.getElementById("runningMacros").innerText = "1";
+    document.getElementById("failedMacros").innerText = "0";
+    document.getElementById("progressValue").innerText = "0%";
+    document.getElementById("progressText").innerText = "0 / " + macros.length;
+    document.getElementById("progressLabel").innerText = "Master Macro running";
+    document.getElementById("progressBar").style.width = "0%";
+
+    renderMacros();
+}
+
+
+/* =====================================================
+   COMPLETE
+===================================================== */
+
+function completeAutomation() {
+
+    automationRunning = false;
+
+    if (masterMacro) {
+        masterMacro.status = "Completed";
+        masterMacro.duration = calculateDuration(executionStart, new Date());
+    }
+
+    document.getElementById("runningMacros").innerText = "0";
+    document.getElementById("completedMacros").innerText = "1";
+    document.getElementById("failedMacros").innerText = "0";
+    document.getElementById("progressValue").innerText = "100%";
+    document.getElementById("progressText").innerText = "Completed";
+    document.getElementById("progressLabel").innerText = "Automation completed";
+    document.getElementById("progressBar").style.width = "100%";
+    document.getElementById("lastExecution").innerText = formatDate(new Date());
+    document.getElementById("runButton").disabled = false;
+
+    addLog("Master Macro completed successfully.", "success");
+    addTimeline("Master Macro completed");
+
+    addHistory("Completed", executionStart, new Date());
+
+    renderMacros();
+}
+
+
+/* =====================================================
+   FAIL
+===================================================== */
+
+function failAutomation(message) {
+
+    automationRunning = false;
+
+    if (masterMacro) {
+        masterMacro.status = "Failed";
+        masterMacro.duration = calculateDuration(executionStart, new Date());
+    }
+
+    document.getElementById("runningMacros").innerText = "0";
+    document.getElementById("failedMacros").innerText = "1";
+    document.getElementById("lastExecution").innerText = "Failed";
+    document.getElementById("progressLabel").innerText = "Automation failed";
+    document.getElementById("runButton").disabled = false;
+
+    addLog("Master Macro FAILED: " + message, "error");
+    addTimeline("Master Macro failed");
+
+    showAlert("Macro execution failed: " + message, "error");
+
+    addHistory("Failed", executionStart, new Date());
+
+    renderMacros();
+}
+
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+function refreshWorkbook() {
+
+    if (!workbook) {
+        showAlert("No workbook is loaded.", "warning");
+        return;
+    }
+
+    try {
+        workbook.RefreshAll();
+        detectMacros();
+        addLog("Workbook refreshed.", "success");
+    }
+    catch (error) {
+        showAlert("Refresh failed: " + error.message, "error");
+    }
+}
+
+
+/* =====================================================
+   CLOSE EXCEL
+===================================================== */
+
+function closeExcel() {
+
+    stopStatusPolling();
+
+    try {
+        if (workbook) { workbook.Close(false); }
+    }
+    catch (ignore) {}
+
+    try {
+        if (excel) {
+            excel.DisplayAlerts = true;
+            excel.Quit();
+        }
+    }
+    catch (ignore2) {}
+
+    workbook = null;
+    excel = null;
+
+    document.getElementById("excelStatus").innerText = "Excel Offline";
+    document.getElementById("excelStatus").className = "status-pill";
+}
+
+
+/* =====================================================
+   LOG
+===================================================== */
+
+function addLog(message, type) {
+
+    var windowElement = document.getElementById("logWindow");
+    var now = new Date();
+    var time = pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+
+    var line = document.createElement("div");
+    line.className = "log-line";
+
+    var typeClass = "log-info";
+    if (type === "success") { typeClass = "log-success"; }
+    if (type === "error") { typeClass = "log-error"; }
+
+    line.innerHTML =
+        "<span class='log-time'>[" + time + "]</span> " +
+        "<span class='" + typeClass + "'>" + escapeHTML(message) + "</span>";
+
+    windowElement.appendChild(line);
+    windowElement.scrollTop = windowElement.scrollHeight;
+}
+
+
+/* =====================================================
+   TIMELINE
+===================================================== */
+
+function addTimeline(message) {
+
+    var timeline = document.getElementById("timeline");
+    var empty = timeline.getElementsByClassName("empty");
+
+    if (empty.length > 0) { timeline.innerHTML = ""; }
+
+    var now = new Date();
+    var time = pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+
+    var item = document.createElement("div");
+    item.className = "timeline-item";
+
+    item.innerHTML =
+        "<div class='timeline-dot'></div>" +
+        "<div>" +
+        "<div class='timeline-time'>" + time + "</div>" +
+        "<div class='timeline-event'>" + escapeHTML(message) + "</div>" +
+        "</div>";
+
+    timeline.appendChild(item);
+    timeline.scrollTop = timeline.scrollHeight;
+}
+
+
+/* =====================================================
+   CLEAR LOGS
+===================================================== */
+
+function clearLogs() {
+    document.getElementById("logWindow").innerHTML = "";
+}
+
+
+/* =====================================================
+   ALERT
+===================================================== */
+
+function showAlert(message, type) {
+
+    var alertBox = document.getElementById("alert");
+
+    alertBox.innerText = message;
+    alertBox.className = "alert";
+
+    if (type === "error") { alertBox.className += " alert-error"; }
+    else if (type === "success") { alertBox.className += " alert-success"; }
+    else { alertBox.className += " alert-warning"; }
+
+    alertBox.style.display = "block";
+
+    window.setTimeout(function () {
+        alertBox.style.display = "none";
+    }, 8000);
+}
+
+
+/* =====================================================
+   STATUS POLLING
+===================================================== */
+
+function startStatusPolling() {
+    stopStatusPolling();
+    pollingTimer = window.setInterval(function () { readRuntimeStatus(); }, 500);
+}
+
+function stopStatusPolling() {
+    if (pollingTimer) {
+        window.clearInterval(pollingTimer);
+        pollingTimer = null;
+    }
+}
+
+/*
+ * Reads a runtime status file created by VBA.
+ * File format:  STATUS|MacroName|Status|Timestamp|Duration|Message
+ */
+function readRuntimeStatus() {
+
+    if (!statusFile) { return; }
+
+    try {
+
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+
+        if (!fso.FileExists(statusFile)) { return; }
+
+        var file = fso.OpenTextFile(statusFile, 1, false);
+        var content = file.ReadAll();
+        file.Close();
+
+        if (!content) { return; }
+
+        var lines = content.split(/\r?\n/);
+
+        for (var i = 0; i < lines.length; i++) {
+            processStatusLine(lines[i]);
+        }
+    }
+    catch (ignore) {}
+}
+
+
+/* =====================================================
+   PROCESS STATUS
+===================================================== */
+
+function processStatusLine(line) {
+
+    if (!line) { return; }
+
+    var parts = line.split("|");
+
+    if (parts.length < 3) { return; }
+    if (parts[0].toUpperCase() !== "STATUS") { return; }
+
+    var macroName = parts[1];
+    var status = parts[2];
+    var timestamp = parts.length > 3 ? parts[3] : "";
+    var duration = parts.length > 4 ? parts[4] : "";
+    var message = parts.length > 5 ? parts.slice(5).join("|") : "";
+
+    updateMacroRuntimeStatus(macroName, status, timestamp, duration, message);
+}
+
+
+/* =====================================================
+   UPDATE MACRO STATUS
+===================================================== */
+
+function updateMacroRuntimeStatus(macroName, status, timestamp, duration, message) {
+
+    var found = false;
+
+    for (var i = 0; i < macros.length; i++) {
+        if (macros[i].name.toLowerCase() === macroName.toLowerCase()) {
+            macros[i].status = status;
+            if (duration) { macros[i].duration = duration; }
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) { return; }
+
+    if (status.toLowerCase() === "running") {
+        addLog(macroName + " started.", "info");
+        addTimeline(macroName + " started");
+    }
+
+    if (status.toLowerCase() === "completed") {
+        addLog(macroName + " completed." + (message ? " " + message : ""), "success");
+        addTimeline(macroName + " completed");
+    }
+
+    if (status.toLowerCase() === "failed") {
+        addLog(macroName + " FAILED: " + message, "error");
+        addTimeline(macroName + " failed");
+    }
+
+    updateKPIs();
+    renderMacros();
+}
+
+
+/* =====================================================
+   KPI UPDATE
+===================================================== */
+
+function updateKPIs() {
+
+    var total = macros.length;
+    var completed = 0;
+    var running = 0;
+    var failed = 0;
+
+    for (var i = 0; i < macros.length; i++) {
+        var status = macros[i].status.toLowerCase();
+        if (status === "completed") { completed++; }
+        if (status === "running") { running++; }
+        if (status === "failed") { failed++; }
+    }
+
+    document.getElementById("totalMacros").innerText = total;
+    document.getElementById("completedMacros").innerText = completed;
+    document.getElementById("runningMacros").innerText = running;
+    document.getElementById("failedMacros").innerText = failed;
+
+    var percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    document.getElementById("progressValue").innerText = percentage + "%";
+    document.getElementById("progressBar").style.width = percentage + "%";
+    document.getElementById("progressText").innerText = completed + " / " + total;
+}
+
+
+/* =====================================================
+   HISTORY
+===================================================== */
+
+function addHistory(status, start, end) {
+    executionHistory.push({
+        status: status,
+        start: start,
+        end: end,
+        duration: calculateDuration(start, end)
+    });
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function navigate(section) {
+
+    var navs = ["navOverview", "navMacros", "navRun", "navLogs"];
+
+    for (var i = 0; i < navs.length; i++) {
+        document.getElementById(navs[i]).className = "nav-item";
+    }
+
+    if (section === "overview") {
+        document.getElementById("navOverview").className = "nav-item active";
+        window.scrollTo(0, 0);
+    }
+
+    if (section === "macros") {
+        document.getElementById("navMacros").className = "nav-item active";
+        document.getElementById("macroSection").scrollIntoView();
+    }
+
+    if (section === "run") {
+        document.getElementById("navRun").className = "nav-item active";
+        document.getElementById("subwaySection").scrollIntoView();
+    }
+
+    if (section === "logs") {
+        document.getElementById("navLogs").className = "nav-item active";
+        document.getElementById("logSection").scrollIntoView();
+    }
+}
+
+
+/* =====================================================
+   UTILITIES
+===================================================== */
+
+function pad(number) {
+    return number < 10 ? "0" + number : number;
+}
+
+function formatDate(date) {
+    return pad(date.getHours()) + ":" + pad(date.getMinutes()) + ":" + pad(date.getSeconds());
+}
+
+function calculateDuration(start, end) {
+
+    if (!start || !end) { return "-"; }
+
+    var seconds = Math.floor((end.getTime() - start.getTime()) / 1000);
+    var minutes = Math.floor(seconds / 60);
+
+    seconds = seconds % 60;
+
+    return minutes + "m " + seconds + "s";
+}
+
+function formatBytes(bytes) {
+
+    if (bytes === 0) { return "0 Bytes"; }
+
+    var units = ["Bytes", "KB", "MB", "GB"];
+    var index = Math.floor(Math.log(bytes) / Math.log(1024));
+
+    return Math.round(bytes / Math.pow(1024, index) * 100) / 100 + " " + units[index];
+}
+
+function escapeHTML(text) {
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =====================================================
+   SUBWAY MAP
+===================================================== */
+
+var subwayRoot = null;
+var subwayNodes = [];
+var subwayEnd = 0;
+var subwayMaxLane = 0;
+var subwayTimer = null;
+
+var SW_COLORS = ["#2563eb", "#dc2626", "#16a34a", "#f59e0b",
+                 "#9333ea", "#0891b2", "#db2777", "#65a30d"];
+var SW_XS = 130;     /* horizontal distance between stations */
+var SW_LH = 110;     /* vertical distance between lines */
+var SW_PADX = 70;
+var SW_PADY = 70;
+
+
+/* ---------- strip comments and string contents (keeps length) ---------- */
+
+function stripCode(line) {
+    var out = "";
+    var inStr = false;
+    var c;
+    for (var i = 0; i < line.length; i++) {
+        c = line.charAt(i);
+        if (inStr) {
+            if (c === '"') {
+                if (line.charAt(i + 1) === '"') { out += "  "; i++; continue; }
+                inStr = false;
+            }
+            out += " ";
+            continue;
+        }
+        if (c === '"') { inStr = true; out += " "; continue; }
+        if (c === "'") {
+            out += new Array(line.length - i + 1).join(" ");
+            break;
+        }
+        out += c;
+    }
+    if (/^\s*Rem\b/i.test(out)) {
+        return out.replace(/./g, " ");
+    }
+    return out;
+}
+
+
+/* ---------- detect which macros each macro calls ---------- */
+
+function analyzeCalls() {
+
+    var byName = {};
+    var modules = {};
+    var i, j, k;
+
+    for (i = 0; i < macros.length; i++) {
+        var key = macros[i].name.toLowerCase();
+        if (!byName[key]) { byName[key] = []; }
+        byName[key].push(macros[i]);
+        modules[macros[i].module.toLowerCase()] = true;
+        macros[i].calls = [];
+        macros[i].calledBy = [];
+    }
+
+    for (i = 0; i < macros.length; i++) {
+
+        var m = macros[i];
+        var seen = {};
+        var lines = String(m.body || "").split(/\r?\n/);
+        var sigSkipped = false;
+        var sigRegex = new RegExp("\\b(Sub|Function)\\s+" + m.name + "\\b", "i");
+
+        for (j = 0; j < lines.length; j++) {
+
+            var raw = lines[j];
+
+            if (!sigSkipped && sigRegex.test(raw)) {
+                sigSkipped = true;
+                continue;
+            }
+
+            var clean = stripCode(raw);
+
+            if (/^\s*(Dim|Const|Static|Declare|End\s+(Sub|Function))\b/i.test(clean)) {
+                continue;
+            }
+
+            var events = [];
+            var mt;
+
+            /* Application.Run "MacroName" */
+            var runRegex = /Application\.Run\s*\(?\s*"([^"]+)"/ig;
+            while ((mt = runRegex.exec(raw)) !== null) {
+                var t = mt[1];
+                t = t.substr(t.lastIndexOf("!") + 1);
+                t = t.substr(t.lastIndexOf(".") + 1);
+                events.push({ pos: mt.index, name: t });
+            }
+
+            /* Call MacroName / MacroName args / Module.MacroName */
+            var idRegex = /[A-Za-z_][A-Za-z0-9_]*/g;
+            while ((mt = idRegex.exec(clean)) !== null) {
+
+                var id = mt[0];
+                var p = mt.index;
+                var lower = id.toLowerCase();
+
+                if (!byName[lower]) { continue; }
+
+                var before = clean.substr(0, p).replace(/\s+$/, "");
+
+                if (before.charAt(before.length - 1) === ".") {
+                    var pm = /([A-Za-z_][A-Za-z0-9_]*)$/.exec(before.substr(0, before.length - 1));
+                    if (!(pm && modules[pm[1].toLowerCase()])) { continue; }
+                }
+
+                /* Function return assignment:  MyFunc = value */
+                if (lower === m.name.toLowerCase() &&
+                    /^\s*=/.test(clean.substr(p + id.length))) {
+                    continue;
+                }
+
+                events.push({ pos: p, name: id });
+            }
+
+            events.sort(function (a, b) { return a.pos - b.pos; });
+
+            for (k = 0; k < events.length; k++) {
+
+                var cands = byName[events[k].name.toLowerCase()];
+                if (!cands) { continue; }
+
+                var target = cands[0];
+                for (var q = 0; q < cands.length; q++) {
+                    if (cands[q].module === m.module) { target = cands[q]; break; }
+                }
+
+                var tk = target.module + "." + target.name;
+                if (seen[tk]) { continue; }
+                seen[tk] = true;
+
+                m.calls.push(target);
+                target.calledBy.push(m.name);
+            }
+        }
+    }
+
+    /* fill the "Calls / Dependency" column */
+    for (i = 0; i < macros.length; i++) {
+        var names = [];
+        for (j = 0; j < macros[i].calls.length; j++) {
+            names.push(macros[i].calls[j].name);
+        }
+        var txt = "";
+        if (names.length) { txt = "Calls: " + names.join(", "); }
+        if (macros[i].calledBy.length) {
+            txt += (txt ? " | " : "") + "Called by: " + macros[i].calledBy.join(", ");
+        }
+        macros[i].dependency = txt || "-";
+    }
+
+    addLog("Call analysis complete.", "success");
+}
+
+
+/* ---------- build the execution tree (DFS = execution order) ---------- */
+
+function swKey(m) {
+    return m.module.toLowerCase() + "." + m.name.toLowerCase();
+}
+
+function swInPath(path, key) {
+    for (var i = 0; i < path.length; i++) {
+        if (path[i] === key) { return true; }
+    }
+    return false;
+}
+
+function swNewNode(macro, parent, lane, x, isRoot, recursive) {
+    return {
+        macro: macro, parent: parent, lane: lane, x: x,
+        kids: [], next: null, isRoot: isRoot, recursive: recursive
+    };
+}
+
+function swVisit(macro, parent, lane, path, isRoot, ctx) {
+
+    var node = swNewNode(macro, parent, lane, ctx.x++, isRoot, false);
+    subwayNodes.push(node);
+    ctx.n++;
+    if (lane > ctx.maxLane) { ctx.maxLane = lane; }
+
+    var newPath = path.concat([swKey(macro)]);
+
+    if (ctx.n > 400 || path.length >= 10) { return node; }
+
+    var kidLane = isRoot ? 0 : lane + 1;
+    var calls = macro.calls || [];
+
+    for (var i = 0; i < calls.length; i++) {
+
+        var c = calls[i];
+
+        if (swInPath(newPath, swKey(c))) {
+            var leaf = swNewNode(c, node, kidLane, ctx.x++, false, true);
+            subwayNodes.push(leaf);
+            node.kids.push(leaf);
+            ctx.n++;
+            if (kidLane > ctx.maxLane) { ctx.maxLane = kidLane; }
+        }
+        else {
+            node.kids.push(swVisit(c, node, kidLane, newPath, false, ctx));
+        }
+    }
+
+    for (var k = 0; k < node.kids.length; k++) {
+        node.kids[k].next = node.kids[k + 1] || null;
+    }
+
+    return node;
+}
+
+function buildSubway() {
+
+    subwayRoot = null;
+    subwayNodes = [];
+
+    if (masterMacro) {
+        var ctx = { x: 0, n: 0, maxLane: 0 };
+        subwayRoot = swVisit(masterMacro, null, 0, [], true, ctx);
+        subwayEnd = ctx.x;
+        subwayMaxLane = ctx.maxLane;
+    }
+
+    renderSubway();
+}
+
+
+/* ---------- drawing ---------- */
+
+function swX(x) { return SW_PADX + x * SW_XS; }
+function swY(l) { return SW_PADY + l * SW_LH; }
+
+function swFill(status) {
+    var s = String(status).toLowerCase();
+    if (s === "running") { return "#fde047"; }
+    if (s === "completed") { return "#86efac"; }
+    if (s === "failed") { return "#fca5a5"; }
+    return "#ffffff";
+}
+
+function swPath(pts) {
+    var d = "M" + pts[0].x + " " + pts[0].y;
+    for (var i = 1; i < pts.length; i++) {
+        var a = pts[i - 1];
+        var b = pts[i];
+        var dy = b.y - a.y;
+        if (dy > 0) {          /* going down: diagonal first */
+            d += " L" + (a.x + dy) + " " + b.y + " L" + b.x + " " + b.y;
+        }
+        else if (dy < 0) {     /* coming back up: flat first, diagonal into station */
+            d += " L" + (b.x + dy) + " " + a.y + " L" + b.x + " " + b.y;
+        }
+        else {
+            d += " L" + b.x + " " + b.y;
+        }
+    }
+    return d;
+}
+
+function swShort(text) {
+    text = String(text);
+    return text.length > 17 ? text.substr(0, 16) + "\u2026" : text;
+}
+
+function renderSubway() {
+
+    var wrap = document.getElementById("subwayWrap");
+    if (!wrap) { return; }
+
+    if (document.documentMode && document.documentMode < 9) {
+        wrap.innerHTML = "<div class='empty'>This window runs in old IE compatibility mode (documentMode " +
+            document.documentMode + ") and cannot draw SVG. Keep the X-UA-Compatible meta tag as the first tag inside &lt;head&gt;.</div>";
+        return;
+    }
+
+    if (!subwayRoot) {
+        wrap.innerHTML = "<div class='empty'>" +
+            (masterMacro ? "Building map..." :
+             "No Master Macro detected - the map starts from the Master Macro.") +
+            "</div>";
+        return;
+    }
+
+    var width = swX(subwayEnd) + SW_PADX;
+    var height = swY(subwayMaxLane) + SW_PADY;
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='" + width +
+              "' height='" + height + "'>";
+    var i, n, pts, color;
+
+    /* lines */
+    for (i = 0; i < subwayNodes.length; i++) {
+
+        n = subwayNodes[i];
+        if (n.kids.length === 0 && !n.isRoot) { continue; }
+
+        pts = [{ x: swX(n.x), y: swY(n.lane) }];
+
+        for (var k = 0; k < n.kids.length; k++) {
+            pts.push({ x: swX(n.kids[k].x), y: swY(n.kids[k].lane) });
+        }
+
+        if (n.isRoot) {
+            pts.push({ x: swX(subwayEnd), y: swY(0) });
+            color = SW_COLORS[0];
+        }
+        else {
+            if (n.next) { pts.push({ x: swX(n.next.x), y: swY(n.next.lane) }); }
+            color = SW_COLORS[n.kids[0].lane % SW_COLORS.length];
+        }
+
+        svg += "<path d='" + swPath(pts) + "' fill='none' stroke='" + color +
+               "' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/>";
+    }
+
+    /* stations */
+    for (i = 0; i < subwayNodes.length; i++) {
+
+        n = subwayNodes[i];
+
+        var cx = swX(n.x);
+        var cy = swY(n.lane);
+        var lineColor = SW_COLORS[n.lane % SW_COLORS.length];
+        var fill = swFill(n.macro.status);
+        var label = (n.recursive ? "\u21BA " : "") + swShort(n.macro.name);
+        var hasKids = n.kids.length > 0;
+
+        if (n.isRoot) {
+            svg += "<circle cx='" + cx + "' cy='" + cy + "' r='15' fill='#172033'/>" +
+                   "<circle cx='" + cx + "' cy='" + cy + "' r='11' fill='" +
+                   (String(n.macro.status).toLowerCase() === "ready" ? "#2563eb" : fill) + "'/>" +
+                   "<text x='" + cx + "' y='" + (cy + 4) +
+                   "' text-anchor='middle' font-size='10' font-weight='700' fill='#172033'>S</text>";
+        }
+        else {
+            if (hasKids) {
+                svg += "<circle cx='" + cx + "' cy='" + cy + "' r='16' fill='white' stroke='#172033' stroke-width='3'/>";
+            }
+            svg += "<circle cx='" + cx + "' cy='" + cy + "' r='11' fill='" + fill +
+                   "' stroke='" + lineColor + "' stroke-width='4'" +
+                   (n.recursive ? " stroke-dasharray='3 2'" : "") + "/>" +
+                   "<text x='" + cx + "' y='" + (cy + 3.5) +
+                   "' text-anchor='middle' font-size='9' font-weight='700' fill='#172033'>" +
+                   i + "</text>";
+        }
+
+        svg += "<text x='" + cx + "' y='" + (cy - 26) +
+               "' text-anchor='middle' font-size='11' font-weight='600' " +
+               "font-family='Segoe UI, Arial, sans-serif' fill='#172033'>" +
+               escapeHTML(label) + "</text>";
+
+        if (n.isRoot) {
+            svg += "<text x='" + cx + "' y='" + (cy + 32) +
+                   "' text-anchor='middle' font-size='9' fill='#64748b'>START</text>";
+        }
+    }
+
+    /* end terminal */
+    var ex = swX(subwayEnd);
+    var ey = swY(0);
+    var endFill = (String(subwayRoot.macro.status).toLowerCase() === "completed") ? "#86efac" : "#ffffff";
+
+    svg += "<circle cx='" + ex + "' cy='" + ey + "' r='15' fill='#172033'/>" +
+           "<circle cx='" + ex + "' cy='" + ey + "' r='11' fill='" + endFill + "'/>" +
+           "<text x='" + ex + "' y='" + (ey + 4) +
+           "' text-anchor='middle' font-size='10' font-weight='700' fill='#172033'>E</text>" +
+           "<text x='" + ex + "' y='" + (ey + 32) +
+           "' text-anchor='middle' font-size='9' fill='#64748b'>END</text>";
+
+    svg += "</svg>";
+
+    wrap.innerHTML = svg;
+}
+
+
+/* ---------- animated replay of the execution path ---------- */
+
+function swEvents(node, out) {
+    if (node.recursive) { return; }
+    out.push({ n: node, t: "in" });
+    for (var i = 0; i < node.kids.length; i++) {
+        swEvents(node.kids[i], out);
+    }
+    out.push({ n: node, t: "out" });
+}
+
+function replayExecution(preview) {
+
+    if (!subwayRoot) {
+        if (preview) {
+            showAlert("No Master Macro detected - nothing to preview.", "warning");
+        }
+        return;
+    }
+
+    if (subwayTimer) { window.clearTimeout(subwayTimer); }
+
+    var ev = [];
+    swEvents(subwayRoot, ev);
+
+    var idx = 0;
+    var k;
+
+    for (k = 0; k < macros.length; k++) { macros[k].status = "Pending"; }
+
+    function step() {
+
+        if (idx >= ev.length) {
+            subwayTimer = null;
+            if (preview) {
+                for (k = 0; k < macros.length; k++) { macros[k].status = "Ready"; }
+                addLog("Flow preview finished.", "info");
+            }
+            else {
+                addLog("Execution path traced: " + subwayNodes.length + " stations.", "success");
+            }
+            renderMacros();
+            updateKPIs();
+            return;
+        }
+
+        var e = ev[idx++];
+        e.n.macro.status = (e.t === "in") ? "Running" : "Completed";
+
+        renderMacros();
+        updateKPIs();
+
+        subwayTimer = window.setTimeout(step, e.t === "in" ? 450 : 200);
+    }
+
+    step();
+}
+
+
+
+/* =====================================================
+   DEMO (no Excel needed - proves the map works)
+===================================================== */
+
+function loadDemo() {
+
+    var defs = [
+        ["MasterAutomation", ["ImportData", "CleanData", "BuildReports", "ExportPDF"]],
+        ["ImportData", ["LoadCSV"]],
+        ["LoadCSV", []],
+        ["CleanData", ["RemoveDuplicates", "FixDates"]],
+        ["RemoveDuplicates", []],
+        ["FixDates", []],
+        ["BuildReports", ["SalesReport", "CostReport"]],
+        ["SalesReport", []],
+        ["CostReport", ["CalcTax"]],
+        ["CalcTax", []],
+        ["ExportPDF", []]
+    ];
+
+    macros = [];
+    masterMacro = null;
+
+    for (var i = 0; i < defs.length; i++) {
+
+        var body = "Sub " + defs[i][0] + "()\n" +
+                   "    ' Call Ignored  (comment)\n" +
+                   "    MsgBox \"BuildReports\"\n";
+
+        for (var j = 0; j < defs[i][1].length; j++) {
+            body += "    Call " + defs[i][1][j] + "\n";
+        }
+
+        body += "End Sub";
+
+        macros.push({
+            name: defs[i][0], module: "Module1", type: "Standard Module",
+            status: "Ready", duration: "-", dependency: "-",
+            startTime: "", endTime: "", body: body, calls: [], calledBy: []
+        });
+    }
+
+    analyzeCalls();
+    findMasterMacro();
+    buildSubway();
+    renderMacros();
+    updateKPIs();
+
+    document.getElementById("runButton").disabled = true;
+    document.getElementById("workbookName").innerText = "Demo";
+    document.getElementById("workbookStatusPill").innerText = "Demo Data";
+    document.getElementById("workbookStatusPill").className = "status-pill blue";
+
+    addLog("Demo macros loaded. Click Preview Flow.", "info");
+}
+
+/* =====================================================
+   WINDOW CLOSE
+===================================================== */
+
+window.onbeforeunload = function () {
+
+    stopStatusPolling();
+
+    try {
+        if (workbook) { workbook.Close(false); }
+    }
+    catch (e) {}
+
+    try {
+        if (excel) {
+            excel.DisplayAlerts = true;
+            excel.Quit();
+        }
+    }
+    catch (e2) {}
+};
+
+</script>
+
+</body>
+</html>
